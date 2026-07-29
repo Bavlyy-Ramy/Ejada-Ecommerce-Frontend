@@ -1,0 +1,74 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  margin: 0 0 1.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+label {
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  color: #444;
+}
+
+input {
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  background-color: #2f6fed;
+  color: white;
+  border: none;
+  padding: 0.7rem;
+  border-radius: 6px;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+button:disabled {
+  background-color: #9db8f5;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #d33;
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+}
+
+.switch-link {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  margin: 1rem 0 0;
+}
+
+.switch-link a {
+  color: #2f6fed;
+  text-decoration: none;
+  font-weight: 600;
+}

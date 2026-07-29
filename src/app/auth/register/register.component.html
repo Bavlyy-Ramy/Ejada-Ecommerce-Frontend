@@ -1,0 +1,32 @@
+<div class="register-page">
+  <form class="register-card" (ngSubmit)="onSubmit()">
+    <h1>Create account</h1>
+    <p class="subtitle">Sign up to start shopping</p>
+
+    <label for="firstName">First name</label>
+    <input id="firstName" type="text" name="firstName" [(ngModel)]="firstName" required />
+
+    <label for="lastName">Last name</label>
+    <input id="lastName" type="text" name="lastName" [(ngModel)]="lastName" required />
+
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" [(ngModel)]="email" required />
+
+    <label for="username">Username</label>
+    <input id="username" type="text" name="username" [(ngModel)]="username" required />
+
+    <label for="password">Password</label>
+    <input id="password" type="password" name="password" [(ngModel)]="password" required />
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+
+    <button type="submit" [disabled]="isLoading">
+      {{ isLoading ? 'Creating account...' : 'Create account' }}
+    </button>
+
+    <p class="switch-link">
+      Already have an account? <a routerLink="/login">Log in</a>
+    </p>
+  </form>
+</div>
