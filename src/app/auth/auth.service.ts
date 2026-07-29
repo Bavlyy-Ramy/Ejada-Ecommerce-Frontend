@@ -123,5 +123,10 @@ export class AuthService {
       return null;
     }
   }
+
+  isSuperAdmin(): boolean {
+    return this.getRoleFromToken() === 'SUPERADMIN';
+  }
 }
+
 

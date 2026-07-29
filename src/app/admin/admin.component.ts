@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ProductService } from '../products/product.service';
 import { UserService } from './user.service';
 import { OrderService } from '../orders/order.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-admin',
@@ -35,6 +36,7 @@ export class AdminComponent implements OnInit {
   editingUser: any = null;  
   newUserRole: 'customer' | 'admin' = 'customer';
   userForm = { username: '', email: '', password: '', firstName: '', lastName: '' };
+  isSuperAdmin = false;
 
   orders: any[] = [];
   orderLoading = false;
@@ -55,10 +57,12 @@ export class AdminComponent implements OnInit {
     private productService: ProductService,
     private userService: UserService,
     private orderService: OrderService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.isSuperAdmin = this.authService.isSuperAdmin();
     this.loadProducts();
   }
 
@@ -154,6 +158,10 @@ export class AdminComponent implements OnInit {
   }
 
   openCreateUser(role: 'customer' | 'admin'): void {
+    if (role === 'admin' && !this.isSuperAdmin) {
+      this.userError = 'Only superadmin can create admin users.';
+      return;
+    }
     this.editingUser = null;
     this.newUserRole = role;
     this.userForm = { username: '', email: '', password: '', firstName: '', lastName: '' };
@@ -200,6 +208,10 @@ export class AdminComponent implements OnInit {
         error: () => { this.userError = 'Could not update user.'; }
       });
     } else {
+      if (this.newUserRole === 'admin' && !this.isSuperAdmin) {
+        this.userError = 'Only superadmin can create admin users.';
+        return;
+      }
       const data = { ...this.userForm };
       const call = this.newUserRole === 'admin'
         ? this.userService.createAdmin(data)

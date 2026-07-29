@@ -75,7 +75,7 @@
       <h2>Manage Users</h2>
       <div class="btn-group">
         <button class="add-btn"      (click)="openCreateUser('customer')">+ Create Customer</button>
-        <button class="add-btn-dark" (click)="openCreateUser('admin')">+ Create Admin</button>
+        <button class="add-btn-dark" *ngIf="isSuperAdmin" (click)="openCreateUser('admin')">+ Create Admin</button>
       </div>
     </div>
 
