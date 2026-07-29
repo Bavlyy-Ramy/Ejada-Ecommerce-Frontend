@@ -16,8 +16,6 @@ export class ProductService {
 
     return this.http.get<any>(`${environment.apiUrl}/products`, { params }).pipe(
       map((response) => {
-        // Spring Data pagination wraps results inside a "content" field.
-        // If your backend just returns a plain array, this still works.
         return response.content ?? response;
       })
     );
