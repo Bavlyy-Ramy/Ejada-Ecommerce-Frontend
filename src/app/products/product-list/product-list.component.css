@@ -20,6 +20,33 @@ h1 {
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-btn {
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.orders-btn {
+  background-color: #2f6fed;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .search-bar {
@@ -75,5 +102,134 @@ h1 {
 .stock {
   color: #666;
   font-size: 0.85rem;
-  margin: 0;
+  margin: 0 0 0.75rem;
+}
+
+/* Add to Cart button */
+.add-btn {
+  width: 100%;
+  background-color: #2f6fed;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Quantity +/- controls */
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-controls button {
+  background-color: #2f6fed;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.qty-controls span {
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+}
+
+
+/* Cart panel */
+.cart-panel {
+  margin-top: 2rem;
+  background: white;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.cart-panel h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+/* Cart table */
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cart-table th,
+.cart-table td {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.cart-table th {
+  color: #555;
+  font-weight: 600;
+}
+
+.cart-table td:nth-child(4) {
+  font-weight: 700;
+  color: #2f6fed;
+}
+
+/* Remove button */
+.remove-btn {
+  background: none;
+  border: none;
+  color: #d33;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.remove-btn:hover {
+  text-decoration: underline;
+}
+
+/* Footer row: total + Place Order */
+.cart-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid #eee;
+}
+
+.cart-total {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #2f6fed;
+}
+
+/* Place Order button */
+.place-order-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.place-order-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success message */
+.success {
+  color: #28a745;
+  font-weight: 600;
+  margin-top: 0.75rem;
 }

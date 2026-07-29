@@ -1,0 +1,215 @@
+<div class="page">
+  <header>
+    <h1>Admin Dashboard</h1>
+    <button class="back-btn" (click)="goBack()">← Back to Products</button>
+  </header>
+
+  <div class="tabs">
+    <button [class.active]="activeTab === 'products'" (click)="setTab('products')">Products</button>
+    <button [class.active]="activeTab === 'users'"    (click)="setTab('users')">Users</button>
+    <button [class.active]="activeTab === 'orders'"   (click)="setTab('orders')">Orders</button>
+  </div>
+
+  <div *ngIf="activeTab === 'products'">
+
+    <div class="tab-header">
+      <h2>Manage Products</h2>
+      <button class="add-btn" (click)="openAddProduct()">+ Add Product</button>
+    </div>
+
+    <p class="success" *ngIf="productSuccess">{{ productSuccess }}</p>
+    <p class="error"   *ngIf="productError">{{ productError }}</p>
+    <p *ngIf="productLoading">Loading...</p>
+
+    <div class="form-card" *ngIf="showProductForm">
+      <h3>{{ editingProduct ? 'Edit Product' : 'Add Product' }}</h3>
+
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="productForm.name" />
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input type="number" [(ngModel)]="productForm.price" />
+      </div>
+      <div class="form-group">
+        <label>Stock Quantity</label>
+        <input type="number" [(ngModel)]="productForm.stockQuantity" />
+      </div>
+      <div class="form-group">
+        <label>Description (optional)</label>
+        <input type="text" [(ngModel)]="productForm.description" />
+      </div>
+
+      <div class="form-actions">
+        <button class="save-btn" (click)="saveProduct()">Save</button>
+        <button class="cancel-btn" (click)="cancelProductForm()">Cancel</button>
+      </div>
+    </div>
+
+    <table class="data-table" *ngIf="!productLoading && products.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of products">
+          <td>{{ p.id }}</td>
+          <td>{{ p.name }}</td>
+          <td>${{ p.price }}</td>
+          <td>{{ p.stockQuantity }}</td>
+          <td class="actions">
+            <button class="edit-btn"   (click)="openEditProduct(p)">Edit</button>
+            <button class="delete-btn" (click)="deleteProduct(p.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!productLoading && products.length === 0">No products found.</p>
+  </div>
+
+  <div *ngIf="activeTab === 'users'">
+
+    <div class="tab-header">
+      <h2>Manage Users</h2>
+      <div class="btn-group">
+        <button class="add-btn"      (click)="openCreateUser('customer')">+ Create Customer</button>
+        <button class="add-btn-dark" (click)="openCreateUser('admin')">+ Create Admin</button>
+      </div>
+    </div>
+
+    <p class="success" *ngIf="userSuccess">{{ userSuccess }}</p>
+    <p class="error"   *ngIf="userError">{{ userError }}</p>
+    <p *ngIf="userLoading">Loading...</p>
+
+    <div class="form-card" *ngIf="showUserForm">
+      <h3>{{ editingUser ? 'Edit User' : ('Create ' + (newUserRole === 'admin' ? 'Admin' : 'Customer')) }}</h3>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" [(ngModel)]="userForm.username" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="userForm.email" />
+      </div>
+      <div class="form-group" *ngIf="!editingUser">
+        <label>Password</label>
+        <input type="password" [(ngModel)]="userForm.password" />
+      </div>
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" [(ngModel)]="userForm.firstName" />
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" [(ngModel)]="userForm.lastName" />
+      </div>
+
+      <div class="form-actions">
+        <button class="save-btn"   (click)="saveUser()">Save</button>
+        <button class="cancel-btn" (click)="cancelUserForm()">Cancel</button>
+      </div>
+    </div>
+
+    <table class="data-table" *ngIf="!userLoading && users.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of users">
+          <td>{{ u.id }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.role }}</td>
+          <td>{{ u.active !== false ? 'Yes' : 'No' }}</td>
+          <td class="actions">
+            <button class="edit-btn"       (click)="openEditUser(u)">Edit</button>
+            <button class="deactivate-btn" (click)="deactivateUser(u.id)"
+                    [disabled]="u.active === false">Deactivate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!userLoading && users.length === 0">No users found.</p>
+  </div>
+
+
+  <div *ngIf="activeTab === 'orders'">
+
+    <div class="tab-header">
+      <h2>Manage Orders</h2>
+    </div>
+
+    <p class="success" *ngIf="orderSuccess">{{ orderSuccess }}</p>
+    <p class="error"   *ngIf="orderError">{{ orderError }}</p>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>Status</label>
+        <select [(ngModel)]="orderFilterStatus">
+          <option *ngFor="let s of statusOptions" [value]="s">{{ s || 'All' }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Username</label>
+        <input type="text" placeholder="e.g. john" [(ngModel)]="orderFilterUsername" />
+      </div>
+      <div class="filter-group">
+        <label>User ID</label>
+        <input type="number" placeholder="e.g. 1" [(ngModel)]="orderFilterUserId" />
+      </div>
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" [(ngModel)]="orderFilterFrom" />
+      </div>
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" [(ngModel)]="orderFilterTo" />
+      </div>
+      <div class="filter-actions">
+        <button class="search-btn" (click)="applyOrderFilters()">Apply</button>
+        <button class="cancel-btn" (click)="clearOrderFilters()">Clear</button>
+      </div>
+    </div>
+
+    <p *ngIf="orderLoading">Loading...</p>
+
+    <table class="data-table" *ngIf="!orderLoading && orders.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of orders">
+          <td>#{{ o.id }}</td>
+          <td>{{ o.username || o.user?.username || '—' }}</td>
+          <td>{{ o.createdAt | date: 'mediumDate' }}</td>
+          <td>
+            <ul class="item-list">
+              <li *ngFor="let item of o.items">
+                {{ item.productName || item.product?.name }} × {{ item.quantity }}
+              </li>
+            </ul>
+          </td>
+          <td>${{ o.totalAmount ?? o.total ?? '—' }}</td>
+          <td>
+            <span class="badge" [class]="'badge-' + o.status?.toLowerCase()">{{ o.status }}</span>
+          </td>
+          <td class="actions">
+            <!-- Inline status selector + Save button -->
+            <select [(ngModel)]="editingOrderStatus[o.id]">
+              <option *ngFor="let s of statusOptions.slice(1)" [value]="s">{{ s }}</option>
+            </select>
+            <button class="save-btn small" (click)="updateOrderStatus(o.id)">Save</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!orderLoading && orders.length === 0">No orders found.</p>
+  </div>
+</div>

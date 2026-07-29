@@ -1,0 +1,79 @@
+<div class="page">
+  <header>
+    <h1>{{ isAdmin ? 'All Orders' : 'My Orders' }}</h1>
+    <button class="back-btn" (click)="goBack()">← Back to Products</button>
+  </header>
+
+  <div class="filters">
+
+    <!-- Status — available to everyone -->
+    <div class="filter-group">
+      <label for="statusFilter">Status</label>
+      <select id="statusFilter" [(ngModel)]="filterStatus">
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s || 'All' }}</option>
+      </select>
+    </div>
+
+    <!-- Admin-only filters -->
+    <ng-container *ngIf="isAdmin">
+      <div class="filter-group">
+        <label for="usernameFilter">Username</label>
+        <input id="usernameFilter" type="text" placeholder="e.g. john" [(ngModel)]="filterUsername" />
+      </div>
+
+      <div class="filter-group">
+        <label for="userIdFilter">User ID</label>
+        <input id="userIdFilter" type="number" placeholder="e.g. 1" [(ngModel)]="filterUserId" />
+      </div>
+
+      <div class="filter-group">
+        <label for="fromFilter">From date</label>
+        <input id="fromFilter" type="date" [(ngModel)]="filterFrom" />
+      </div>
+
+      <div class="filter-group">
+        <label for="toFilter">To date</label>
+        <input id="toFilter" type="date" [(ngModel)]="filterTo" />
+      </div>
+    </ng-container>
+
+    <div class="filter-actions">
+      <button class="search-btn" (click)="onFilter()">Apply</button>
+      <button class="clear-btn" (click)="clearFilters()">Clear</button>
+    </div>
+  </div>
+
+  <p *ngIf="isLoading">Loading orders...</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p *ngIf="!isLoading && !errorMessage && orders.length === 0">No orders found.</p>
+
+  <table class="orders-table" *ngIf="!isLoading && orders.length > 0">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th *ngIf="isAdmin">Customer</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Items</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of orders">
+        <td>#{{ order.id }}</td>
+        <td *ngIf="isAdmin">{{ order.username || order.user?.username || '—' }}</td>
+        <td>{{ order.createdAt | date: 'mediumDate' }}</td>
+        <td><span class="badge" [class]="'badge-' + order.status?.toLowerCase()">{{ order.status }}</span></td>
+        <!-- Items list -->
+        <td>
+          <ul class="item-list">
+            <li *ngFor="let item of order.items">
+              {{ item.productName || item.product?.name }} × {{ item.quantity }}
+            </li>
+          </ul>
+        </td>
+        <td>${{ order.totalAmount ?? order.total ?? '—' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
