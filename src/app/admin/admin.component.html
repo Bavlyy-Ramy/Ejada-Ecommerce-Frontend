@@ -339,7 +339,30 @@
     </div>
     <div class="empty" *ngIf="!orderLoading && orders.length === 0">No orders found.</div>
 
+    <!-- Pagination controls -->
+    <div class="pagination-bar" *ngIf="!orderLoading && orderTotal > orderPageSize">
+      <span class="pagination-info">
+        Showing {{ orderPage * orderPageSize + 1 }}–{{ orderPage * orderPageSize + orders.length }} of {{ orderTotal }} orders
+      </span>
+      <div class="pagination-controls">
+        <button class="page-btn" (click)="orderGoToPage(0)" [disabled]="orderPage === 0" title="First">«</button>
+        <button class="page-btn" (click)="orderGoToPage(orderPage - 1)" [disabled]="orderPage === 0" title="Previous">‹</button>
+        <ng-container *ngFor="let p of [].constructor(orderTotalPages); let i = index">
+          <button
+            class="page-btn"
+            [class.active]="i === orderPage"
+            (click)="orderGoToPage(i)"
+            *ngIf="i >= orderPage - 2 && i <= orderPage + 2"
+          >{{ i + 1 }}</button>
+        </ng-container>
+        <button class="page-btn" (click)="orderGoToPage(orderPage + 1)" [disabled]="orderPage >= orderTotalPages - 1" title="Next">›</button>
+        <button class="page-btn" (click)="orderGoToPage(orderTotalPages - 1)" [disabled]="orderPage >= orderTotalPages - 1" title="Last">»</button>
+      </div>
+    </div>
+
   </div>
+
+
 
 </main>
 

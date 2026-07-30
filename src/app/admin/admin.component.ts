@@ -50,6 +50,12 @@ export class AdminComponent implements OnInit {
   orderFilterFrom     = '';
   orderFilterTo       = '';
 
+  // Pagination
+  orderPage     = 0;   // 0-based page index (Spring)
+  orderPageSize = 10;
+  orderTotal    = 0;   // total elements from backend
+  get orderTotalPages(): number { return Math.ceil(this.orderTotal / this.orderPageSize); }
+
   statusOptions = ['', 'PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
   editingOrderStatus: { [id: number]: string } = {};
@@ -69,9 +75,9 @@ export class AdminComponent implements OnInit {
 
   setTab(tab: 'products' | 'users' | 'orders'): void {
     this.activeTab = tab;
-    if (tab === 'products' && this.products.length === 0) this.loadProducts();
-    if (tab === 'users'    && this.users.length === 0)    this.loadUsers();
-    if (tab === 'orders'   && this.orders.length === 0)   this.loadOrders();
+    if (tab === 'products') this.loadProducts();
+    if (tab === 'users')    this.loadUsers();
+    if (tab === 'orders')   this.loadOrders();
   }
 
   loadProducts(): void {
@@ -240,7 +246,10 @@ export class AdminComponent implements OnInit {
   loadOrders(): void {
     this.orderLoading = true;
     this.orderError = '';
-    const filters: any = {};
+    const filters: any = {
+      page: this.orderPage,
+      size: this.orderPageSize
+    };
     if (this.orderFilterStatus)   filters.status   = this.orderFilterStatus;
     if (this.orderFilterUsername) filters.username = this.orderFilterUsername;
     if (this.orderFilterUserId)   filters.userId   = Number(this.orderFilterUserId);
@@ -249,8 +258,14 @@ export class AdminComponent implements OnInit {
 
     this.orderService.getAllOrders(filters).subscribe({
       next: (res) => {
-        this.orders = res.content ?? res;
-        // Pre-fill the inline status selects with the current status of each order
+        // Handle both paginated (Spring Page) and plain array responses
+        if (res && res.content !== undefined) {
+          this.orders    = res.content;
+          this.orderTotal = res.totalElements ?? res.content.length;
+        } else {
+          this.orders    = Array.isArray(res) ? res : [];
+          this.orderTotal = this.orders.length;
+        }
         this.orders.forEach(o => { this.editingOrderStatus[o.id] = o.status; });
         this.orderLoading = false;
       },
@@ -258,11 +273,21 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  applyOrderFilters(): void { this.loadOrders(); }
+  applyOrderFilters(): void {
+    this.orderPage = 0;  // reset to first page on new filter
+    this.loadOrders();
+  }
 
   clearOrderFilters(): void {
     this.orderFilterStatus = this.orderFilterUsername =
     this.orderFilterUserId = this.orderFilterFrom = this.orderFilterTo = '';
+    this.orderPage = 0;
+    this.loadOrders();
+  }
+
+  orderGoToPage(page: number): void {
+    if (page < 0 || page >= this.orderTotalPages) return;
+    this.orderPage = page;
     this.loadOrders();
   }
 
