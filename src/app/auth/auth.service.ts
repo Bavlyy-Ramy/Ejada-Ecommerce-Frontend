@@ -22,6 +22,17 @@ export class AuthService {
           if (role) {
             localStorage.setItem('user_role', typeof role === 'string' ? role : JSON.stringify(role));
           }
+          const displayName =
+            response.firstName ||
+            response.name ||
+            response.user?.firstName ||
+            response.username ||
+            response.user?.username ||
+            username;
+          if (displayName) {
+            localStorage.setItem('user_name', displayName);
+          }
+          localStorage.setItem('username', username);
         })
       );
   }
@@ -43,6 +54,8 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem('user_role');
+    localStorage.removeItem('user_name');
+    localStorage.removeItem('username');
   }
 
   getToken(): string | null {
@@ -51,6 +64,39 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  getUserName(): string | null {
+    const storedName = localStorage.getItem('user_name');
+    if (storedName) {
+      return storedName;
+    }
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      return storedUsername;
+    }
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const parts = token.split('.');
+      if (parts.length < 2) return null;
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+      let payload: any = null;
+      try {
+        payload = JSON.parse(atob(base64));
+      } catch {
+        try {
+          payload = JSON.parse(decodeURIComponent(escape(atob(base64))));
+        } catch {}
+      }
+
+      if (!payload) return null;
+      return payload.firstName || payload.name || payload.username || payload.sub || payload.preferred_username || null;
+    } catch {
+      return null;
+    }
   }
 
   private normalizeRole(role: any): string | null {

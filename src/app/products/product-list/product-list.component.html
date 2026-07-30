@@ -1,6 +1,9 @@
 <div class="page">
   <header>
-    <h1>Products</h1>
+    <div class="header-title">
+      <h1>Products</h1>
+      <p class="welcome-msg" *ngIf="userName">Welcome, <span>{{ userName }}</span>!</p>
+    </div>
     <div class="header-actions">
       <button class="admin-btn" *ngIf="isAdmin" (click)="goToAdmin()">Admin Panel</button>
       <button class="orders-btn" (click)="goToOrders()">My Orders</button>

@@ -25,6 +25,7 @@ export class ProductListComponent implements OnInit {
   orderError = '';
   isPlacingOrder = false;
   isAdmin = false;
+  userName = '';
 
   constructor(
     private productService: ProductService,
@@ -36,6 +37,7 @@ export class ProductListComponent implements OnInit {
   ngOnInit(): void {
     const role = this.authService.getRoleFromToken();
     this.isAdmin = role === 'ADMIN' || role === 'SUPERADMIN' || (!!role && role.includes('ADMIN'));
+    this.userName = this.authService.getUserName() || 'Customer';
     this.loadProducts();
   }
 
