@@ -28,19 +28,33 @@
   </p>
 
   <div class="product-grid">
-    <div class="product-card" *ngFor="let product of products">
-      <h2>{{ product.name }}</h2>
+    <div
+      class="product-card clickable"
+      *ngFor="let product of products"
+      (click)="openProductModal(product, $event)"
+    >
+      <div class="product-card-header">
+        <h2>{{ product.name }}</h2>
+        <span class="stock-badge" [class.badge-danger]="product.stockQuantity <= 0">
+          {{ product.stockQuantity > 0 ? 'In stock: ' + product.stockQuantity : 'Out of Stock' }}
+        </span>
+      </div>
       <p class="price">${{ product.price }}</p>
-      <p class="stock">In stock: {{ product.stockQuantity }}</p>
 
       <!-- Add to Cart controls -->
-      <div class="cart-controls" *ngIf="getCartCount(product.id) === 0">
-        <button class="add-btn" (click)="addToCart(product)">Add to Cart</button>
+      <div class="cart-controls" (click)="$event.stopPropagation()" *ngIf="getCartCount(product.id) === 0">
+        <button
+          class="add-btn"
+          [disabled]="product.stockQuantity <= 0"
+          (click)="addToCart(product)"
+        >
+          {{ product.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
+        </button>
       </div>
-      <div class="qty-controls" *ngIf="getCartCount(product.id) > 0">
+      <div class="qty-controls" (click)="$event.stopPropagation()" *ngIf="getCartCount(product.id) > 0">
         <button (click)="removeFromCart(product.id)">−</button>
         <span>{{ getCartCount(product.id) }}</span>
-        <button (click)="addToCart(product)">+</button>
+        <button [disabled]="getCartCount(product.id) >= product.stockQuantity" (click)="addToCart(product)">+</button>
       </div>
     </div>
   </div>
@@ -66,7 +80,7 @@
             <div class="qty-controls">
               <button (click)="removeFromCart(line.product.id)">−</button>
               <span>{{ line.quantity }}</span>
-              <button (click)="addToCart(line.product)">+</button>
+              <button [disabled]="line.quantity >= line.product.stockQuantity" (click)="addToCart(line.product)">+</button>
             </div>
           </td>
           <td>${{ line.subtotal }}</td>
@@ -87,4 +101,60 @@
 
   <p class="success" *ngIf="orderSuccess">✅ Order placed successfully!</p>
   <p class="error" *ngIf="orderError">{{ orderError }}</p>
+
+  <!-- Product Details Modal -->
+  <div class="modal-backdrop" *ngIf="selectedProduct" (click)="closeProductModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeProductModal()">&times;</button>
+      
+      <div class="modal-header">
+        <span
+          class="badge"
+          [class.badge-danger]="selectedProduct.stockQuantity <= 0"
+          [class.badge-success]="selectedProduct.stockQuantity > 0"
+        >
+          {{ selectedProduct.stockQuantity > 0 ? 'In Stock' : 'Out of Stock' }}
+        </span>
+        <h2>{{ selectedProduct.name }}</h2>
+        <p class="modal-price">${{ selectedProduct.price }}</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-row">
+          <span class="detail-label">Product ID:</span>
+          <span class="detail-value">#{{ selectedProduct.id }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Available Stock:</span>
+          <span class="detail-value">{{ selectedProduct.stockQuantity }} units</span>
+        </div>
+        <div class="detail-row description-row">
+          <span class="detail-label">Description:</span>
+          <p class="detail-description">
+            {{ selectedProduct.description || 'No description available for this product.' }}
+          </p>
+        </div>
+
+        <p *ngIf="isModalLoading" class="modal-loading">Loading full details...</p>
+      </div>
+
+      <div class="modal-footer">
+        <div class="cart-controls" *ngIf="getCartCount(selectedProduct.id) === 0">
+          <button
+            class="add-btn"
+            [disabled]="selectedProduct.stockQuantity <= 0"
+            (click)="addToCart(selectedProduct)"
+          >
+            {{ selectedProduct.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
+          </button>
+        </div>
+        <div class="qty-controls" *ngIf="getCartCount(selectedProduct.id) > 0">
+          <button (click)="removeFromCart(selectedProduct.id)">−</button>
+          <span>{{ getCartCount(selectedProduct.id) }}</span>
+          <button [disabled]="getCartCount(selectedProduct.id) >= selectedProduct.stockQuantity" (click)="addToCart(selectedProduct)">+</button>
+        </div>
+        <button class="secondary-btn" (click)="closeProductModal()">Close</button>
+      </div>
+    </div>
+  </div>
 </div>

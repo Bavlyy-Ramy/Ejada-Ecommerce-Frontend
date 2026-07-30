@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Products — Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#161B22;
+    --ink-soft:#232B36;
+    --paper:#F1F2F5;
+    --card:#FFFFFF;
+    --amber:#F0A500;
+    --amber-deep:#C77F00;
+    --green:#2F9E44;
+    --amber-warn:#E8A317;
+    --red:#E03131;
+    --muted:#5B6472;
+    --border:#E2E4E8;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .toolbar{
+    background:var(--ink);
+    color:#fff;
+    padding:18px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .brand h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:22px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  .brand span.tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--amber);
+    background:rgba(240,165,0,0.12);
+    border:1px solid rgba(240,165,0,0.35);
+    padding:2px 8px;
+    border-radius:20px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  .toolbar-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .user-chip{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:#C7CCD4;
+  }
+  .avatar{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--amber);
+    color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:12px;
+  }
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    border-radius:7px;
+    padding:9px 16px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .12s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-ghost{
+    background:transparent;
+    border-color:#3A4350;
+    color:#E7E9EC;
+  }
+  .btn-ghost:hover{ border-color:#5B6472; background:#1E2530; }
+  .btn-amber{
+    background:var(--amber);
+    color:var(--ink);
+  }
+  .btn-amber:hover{ background:var(--amber-deep); }
+  .btn-outline-dark{
+    background:transparent;
+    border-color:#3A4350;
+    color:#E7E9EC;
+  }
+
+  .cart-pill{
+    display:flex;align-items:center;gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--ink);
+    background:var(--amber);
+    padding:7px 12px;
+    border-radius:20px;
+    font-weight:700;
+  }
+
+  main{
+    max-width:1180px;
+    margin:0 auto;
+    padding:36px 32px 80px;
+  }
+
+  .page-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .page-head h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:30px;
+    margin:0 0 4px;
+  }
+  .page-head p{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .count-badge{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--muted);
+    background:#fff;
+    border:1px solid var(--border);
+    padding:6px 12px;
+    border-radius:20px;
+  }
+
+  .search-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:30px;
+  }
+  .search-row input{
+    flex:1;
+    font-family:'JetBrains Mono',monospace;
+    font-size:14px;
+    padding:13px 16px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    outline:none;
+  }
+  .search-row input:focus{
+    border-color:var(--amber);
+    box-shadow:0 0 0 3px rgba(240,165,0,0.18);
+  }
+  .search-row input::placeholder{ color:#9AA1AC; }
+  .search-row button{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:0 24px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .search-row button:hover{ background:var(--ink-soft); }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:20px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    transition:box-shadow .18s ease, transform .18s ease;
+    position:relative;
+  }
+  .card:hover{
+    box-shadow:0 10px 24px -12px rgba(22,27,34,0.25);
+    transform:translateY(-2px);
+  }
+  .barcode{
+    height:14px;
+    background:repeating-linear-gradient(90deg,
+      var(--ink) 0px, var(--ink) 2px,
+      transparent 2px, transparent 4px,
+      var(--ink) 4px, var(--ink) 5px,
+      transparent 5px, transparent 9px,
+      var(--ink) 9px, var(--ink) 10px,
+      transparent 10px, transparent 14px);
+    opacity:0.85;
+  }
+  .card-body{
+    padding:18px 18px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    flex:1;
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .card-top h3{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:17px;
+    margin:0;
+    line-height:1.25;
+  }
+  .led{
+    width:9px;height:9px;border-radius:50%;
+    margin-top:5px;
+    flex-shrink:0;
+    box-shadow:0 0 0 3px currentColor22;
+  }
+  .led.ok{ background:var(--green); color:var(--green); }
+  .led.low{ background:var(--amber-warn); color:var(--amber-warn); }
+  .led.out{ background:var(--red); color:var(--red); }
+
+  .price{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:21px;
+    color:var(--ink);
+  }
+
+  .divider{
+    border:none;
+    border-top:1px dashed var(--border);
+    margin:2px 0;
+  }
+
+  .stock-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--muted);
+  }
+  .stock-row .stock-label{
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-size:11px;
+  }
+  .stock-row .stock-val{
+    font-weight:700;
+  }
+  .stock-val.ok{ color:var(--green); }
+  .stock-val.low{ color:var(--amber-warn); }
+  .stock-val.out{ color:var(--red); }
+
+  .add-btn{
+    margin-top:6px;
+    width:100%;
+    padding:11px;
+    border-radius:7px;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    background:var(--ink);
+    color:#fff;
+    transition:background .15s ease, transform .12s ease;
+  }
+  .add-btn:hover{ background:var(--amber); color:var(--ink); }
+  .add-btn:active{ transform:translateY(1px); }
+  .add-btn:disabled{
+    background:#E9EAEC;
+    color:#A7ACB4;
+    cursor:not-allowed;
+  }
+
+  .empty{
+    grid-column:1/-1;
+    text-align:center;
+    padding:60px 20px;
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    background:var(--ink);
+    color:#fff;
+    padding:13px 18px;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 12px 28px -10px rgba(0,0,0,0.4);
+    transform:translateY(20px);
+    opacity:0;
+    transition:transform .25s ease, opacity .25s ease;
+    pointer-events:none;
+  }
+  .toast.show{ transform:translateY(0); opacity:1; }
+  .toast .dot{ width:7px;height:7px;border-radius:50%;background:var(--amber); }
+
+  @media (max-width:600px){
+    .toolbar{ padding:16px 18px; }
+    main{ padding:26px 18px 60px; }
+    .search-row{ flex-direction:column; }
+    .search-row button{ padding:13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="brand">
+    <h1>Products</h1>
+    <span class="tag">Inventory</span>
+  </div>
+  <div class="toolbar-right">
+    <div class="cart-pill">🛒 <span id="cartCount">0</span> in cart</div>
+    <div class="user-chip">
+      <div class="avatar">SA</div>
+      superadmin
+    </div>
+    <button class="btn btn-ghost">Admin panel</button>
+    <button class="btn btn-outline-dark">My orders</button>
+    <button class="btn btn-amber" onclick="return confirmLogout()">Log out</button>
+  </div>
+</div>
+
+<main>
+  <div class="page-head">
+    <div>
+      <h2>Catalog</h2>
+      <p>Browse current stock and add items to your cart.</p>
+    </div>
+    <div class="count-badge" id="resultCount">6 items</div>
+  </div>
+
+  <div class="search-row">
+    <input id="searchInput" type="text" placeholder="search products by name…" onkeydown="if(event.key==='Enter')runSearch()">
+    <button onclick="runSearch()">Search</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script>
+  const products = [
+    { name: "Laptop", price: 3500, stock: 10 },
+    { name: "Wireless Mouse", price: 450, stock: 94 },
+    { name: "CPU222", price: 500, stock: 0 },
+    { name: "Monitor", price: 5200, stock: 17 },
+    { name: "USB-C Cable", price: 120, stock: 200 },
+    { name: "wifi", price: 5958, stock: 6 },
+  ];
+
+  let cartCount = 0;
+
+  function stockLevel(stock){
+    if(stock === 0) return "out";
+    if(stock < 10) return "low";
+    return "ok";
+  }
+  function stockLabel(stock){
+    if(stock === 0) return "Out of stock";
+    if(stock < 10) return `Low · ${stock} left`;
+    return `${stock} in stock`;
+  }
+
+  function render(list){
+    const grid = document.getElementById('grid');
+    grid.innerHTML = "";
+    document.getElementById('resultCount').textContent = `${list.length} item${list.length===1?'':'s'}`;
+
+    if(list.length === 0){
+      grid.innerHTML = `<div class="empty">No products match that search.</div>`;
+      return;
+    }
+
+    list.forEach((p, idx) => {
+      const level = stockLevel(p.stock);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="barcode"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <h3>${p.name}</h3>
+            <div class="led ${level}"></div>
+          </div>
+          <div class="price">$${p.price.toLocaleString()}</div>
+          <hr class="divider">
+          <div class="stock-row">
+            <span class="stock-label">Stock</span>
+            <span class="stock-val ${level}">${stockLabel(p.stock)}</span>
+          </div>
+          <button class="add-btn" ${p.stock===0?'disabled':''} onclick="addToCart('${p.name.replace(/'/g,"\\'")}')">
+            ${p.stock===0?'Out of stock':'Add to cart'}
+          </button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function addToCart(name){
+    cartCount += 1;
+    document.getElementById('cartCount').textContent = cartCount;
+    showToast(`Added ${name} to cart`);
+  }
+
+  let toastTimer;
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> toast.classList.remove('show'), 2200);
+  }
+
+  function runSearch(){
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filtered = products.filter(p => p.name.toLowerCase().includes(q));
+    render(filtered);
+  }
+
+  function confirmLogout(){
+    showToast("Logged out");
+    return false;
+  }
+
+  render(products);
+</script>
+
+</body>
+</html>

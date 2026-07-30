@@ -21,6 +21,10 @@ export class ProductService {
     );
   }
 
+  getProductById(id: number): Observable<Product> {
+    return this.http.get<Product>(`${environment.apiUrl}/products/${id}`);
+  }
+
   // Admin: POST /api/products
   addProduct(data: { name: string; price: number; stockQuantity: number; description?: string }): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/products`, data);

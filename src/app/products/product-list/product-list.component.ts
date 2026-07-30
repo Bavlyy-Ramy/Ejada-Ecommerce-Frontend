@@ -27,6 +27,9 @@ export class ProductListComponent implements OnInit {
   isAdmin = false;
   userName = '';
 
+  selectedProduct: Product | null = null;
+  isModalLoading = false;
+
   constructor(
     private productService: ProductService,
     private authService: AuthService,
@@ -48,6 +51,13 @@ export class ProductListComponent implements OnInit {
     this.productService.getProducts(this.searchTerm).subscribe({
       next: (products) => {
         this.products = products;
+        // Keep selectedProduct in sync if modal is open
+        if (this.selectedProduct) {
+          const updated = products.find((p) => p.id === this.selectedProduct?.id);
+          if (updated) {
+            this.selectedProduct = { ...this.selectedProduct, ...updated };
+          }
+        }
         this.isLoading = false;
       },
       error: () => {
@@ -59,6 +69,34 @@ export class ProductListComponent implements OnInit {
 
   onSearch(): void {
     this.loadProducts();
+  }
+
+  openProductModal(product: Product, event?: MouseEvent): void {
+    if (event) {
+      const target = event.target as HTMLElement;
+      if (target.closest('.cart-controls') || target.closest('.qty-controls') || target.tagName === 'BUTTON') {
+        return;
+      }
+    }
+
+    this.selectedProduct = { ...product };
+    this.isModalLoading = true;
+
+    this.productService.getProductById(product.id).subscribe({
+      next: (fullProduct) => {
+        if (fullProduct) {
+          this.selectedProduct = fullProduct;
+        }
+        this.isModalLoading = false;
+      },
+      error: () => {
+        this.isModalLoading = false;
+      }
+    });
+  }
+
+  closeProductModal(): void {
+    this.selectedProduct = null;
   }
 
   getCartCount(productId: number): number {
@@ -95,7 +133,9 @@ export class ProductListComponent implements OnInit {
 
   addToCart(product: Product): void {
     const current = this.cartItems.get(product.id) ?? 0;
-    this.cartItems.set(product.id, current + 1);
+    if (current < product.stockQuantity) {
+      this.cartItems.set(product.id, current + 1);
+    }
   }
 
   removeFromCart(productId: number): void {
@@ -126,6 +166,7 @@ export class ProductListComponent implements OnInit {
         this.orderSuccess = true;
         this.cartItems.clear(); // empty the cart after a successful order
         this.isPlacingOrder = false;
+        this.loadProducts(); // Update product stock UI from backend after order
       },
       error: () => {
         this.orderError = 'Could not place order. Please try again.';
