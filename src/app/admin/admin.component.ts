@@ -37,6 +37,7 @@ export class AdminComponent implements OnInit {
   newUserRole: 'customer' | 'admin' = 'customer';
   userForm = { username: '', email: '', password: '', firstName: '', lastName: '' };
   isSuperAdmin = false;
+  selectedUser: any = null;
 
   orders: any[] = [];
   orderLoading = false;
@@ -274,6 +275,20 @@ export class AdminComponent implements OnInit {
       },
       error: () => { this.orderError = 'Could not update order status.'; }
     });
+  }
+
+  openUserDetail(user: any): void {
+    this.selectedUser = user;
+  }
+
+  closeUserDetail(): void {
+    this.selectedUser = null;
+  }
+
+  getUserInitials(user: any): string {
+    const first = (user.firstName || user.username || '?')[0].toUpperCase();
+    const last  = (user.lastName  || '')[0]?.toUpperCase() || '';
+    return first + last;
   }
 
   goBack(): void {

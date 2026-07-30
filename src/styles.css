@@ -1,19 +1,47 @@
+:root {
+  --ink: #161B22;
+  --ink-soft: #232B36;
+  --paper: #F1F2F5;
+  --card: #FFFFFF;
+  --amber: #F0A500;
+  --amber-deep: #C77F00;
+  --green: #2F9E44;
+  --amber-warn: #E8A317;
+  --red: #E03131;
+  --muted: #5B6472;
+  --border: #E2E4E8;
+  --radius: 10px;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background-color: #f5f6f8;
-  color: #222;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-input, button {
+input, button, select, textarea {
   font-family: inherit;
-  font-size: 1rem;
 }
 
 button {
   cursor: pointer;
+}
+
+/* Global utility barcode helper */
+.barcode-strip {
+  height: 14px;
+  background: repeating-linear-gradient(90deg,
+    var(--ink) 0px, var(--ink) 2px,
+    transparent 2px, transparent 4px,
+    var(--ink) 4px, var(--ink) 5px,
+    transparent 5px, transparent 9px,
+    var(--ink) 9px, var(--ink) 10px,
+    transparent 10px, transparent 14px);
+  opacity: 0.85;
 }

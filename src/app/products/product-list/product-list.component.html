@@ -1,66 +1,94 @@
-<div class="page">
-  <header>
-    <div class="header-title">
-      <h1>Products</h1>
-      <p class="welcome-msg" *ngIf="userName">Welcome, <span>{{ userName }}</span>!</p>
+<div class="toolbar">
+  <div class="brand">
+    <h1>Products</h1>
+    <span class="tag">Inventory</span>
+  </div>
+  <div class="toolbar-right">
+    <div class="cart-pill" (click)="scrollToCart()" title="View Cart">
+      🛒 <span>{{ totalCartItems }}</span> in cart
     </div>
-    <div class="header-actions">
-      <button class="admin-btn" *ngIf="isAdmin" (click)="goToAdmin()">Admin Panel</button>
-      <button class="orders-btn" (click)="goToOrders()">My Orders</button>
-      <button class="logout-btn" (click)="logout()">Log out</button>
+    <div class="user-chip" (click)="openProfileModal()" title="View profile" style="cursor:pointer">
+      <div class="avatar">{{ userInitials }}</div>
+      {{ userName }}
     </div>
-  </header>
+    <button class="btn btn-ghost" *ngIf="isAdmin" (click)="goToAdmin()">Admin panel</button>
+    <button class="btn btn-outline-dark" (click)="goToOrders()">My orders</button>
+    <button class="btn btn-amber" (click)="logout()">Log out</button>
+  </div>
+</div>
 
-  <div class="search-bar">
+<main>
+  <div class="page-head">
+    <div>
+      <h2>Catalog</h2>
+      <p>Browse current stock and add items to your cart.</p>
+    </div>
+    <div class="count-badge" id="resultCount">
+      {{ products.length }} item{{ products.length === 1 ? '' : 's' }}
+    </div>
+  </div>
+
+  <div class="search-row">
     <input
       type="text"
-      placeholder="Search products by name..."
+      placeholder="search products by name…"
       [(ngModel)]="searchTerm"
       (keyup.enter)="onSearch()"
     />
     <button (click)="onSearch()">Search</button>
   </div>
 
-  <p *ngIf="isLoading">Loading products...</p>
-  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <p *ngIf="!isLoading && !errorMessage && products.length === 0">
-    No products found.
-  </p>
+  <div *ngIf="isLoading" class="empty">Loading products catalog...</div>
+  <div *ngIf="errorMessage" class="empty error">{{ errorMessage }}</div>
+  <div *ngIf="!isLoading && !errorMessage && products.length === 0" class="empty">
+    No products found matching search.
+  </div>
 
-  <div class="product-grid">
+  <div class="grid" *ngIf="!isLoading && !errorMessage && products.length > 0">
     <div
-      class="product-card clickable"
+      class="card"
       *ngFor="let product of products"
       (click)="openProductModal(product, $event)"
     >
-      <div class="product-card-header">
-        <h2>{{ product.name }}</h2>
-        <span class="stock-badge" [class.badge-danger]="product.stockQuantity <= 0">
-          {{ product.stockQuantity > 0 ? 'In stock: ' + product.stockQuantity : 'Out of Stock' }}
-        </span>
-      </div>
-      <p class="price">${{ product.price }}</p>
+      <div class="barcode"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <h3>{{ product.name }}</h3>
+          <div class="led" [ngClass]="stockLevel(product.stockQuantity)"></div>
+        </div>
+        <div class="price">${{ product.price | number }}</div>
+        <hr class="divider">
+        <div class="stock-row">
+          <span class="stock-label">Stock</span>
+          <span class="stock-val" [ngClass]="stockLevel(product.stockQuantity)">
+            {{ stockLabel(product.stockQuantity) }}
+          </span>
+        </div>
 
-      <!-- Add to Cart controls -->
-      <div class="cart-controls" (click)="$event.stopPropagation()" *ngIf="getCartCount(product.id) === 0">
         <button
           class="add-btn"
+          *ngIf="getCartCount(product.id) === 0"
           [disabled]="product.stockQuantity <= 0"
-          (click)="addToCart(product)"
+          (click)="addToCart(product); $event.stopPropagation()"
         >
-          {{ product.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
+          {{ product.stockQuantity <= 0 ? 'Out of stock' : 'Add to cart' }}
         </button>
-      </div>
-      <div class="qty-controls" (click)="$event.stopPropagation()" *ngIf="getCartCount(product.id) > 0">
-        <button (click)="removeFromCart(product.id)">−</button>
-        <span>{{ getCartCount(product.id) }}</span>
-        <button [disabled]="getCartCount(product.id) >= product.stockQuantity" (click)="addToCart(product)">+</button>
+
+        <div class="qty-pill-controls" (click)="$event.stopPropagation()" *ngIf="getCartCount(product.id) > 0">
+          <button (click)="removeFromCart(product.id)">−</button>
+          <span>{{ getCartCount(product.id) }}</span>
+          <button [disabled]="getCartCount(product.id) >= product.stockQuantity" (click)="addToCart(product)">+</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="cart-panel" *ngIf="totalCartItems > 0">
-    <h3>🛒 Your Cart</h3>
+  <!-- Cart Section -->
+  <div class="cart-panel" id="cartSection" *ngIf="totalCartItems > 0">
+    <div class="cart-header">
+      <h3>🛒 Shopping Cart</h3>
+      <span class="cart-count-badge">{{ totalCartItems }} item{{ totalCartItems === 1 ? '' : 's' }}</span>
+    </div>
 
     <table class="cart-table">
       <thead>
@@ -69,21 +97,21 @@
           <th>Unit Price</th>
           <th>Quantity</th>
           <th>Subtotal</th>
-          <th></th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let line of cartLines">
-          <td>{{ line.product.name }}</td>
-          <td>${{ line.product.price }}</td>
+          <td class="font-bold">{{ line.product.name }}</td>
+          <td class="font-mono">${{ line.product.price | number }}</td>
           <td>
-            <div class="qty-controls">
+            <div class="qty-pill-controls sm">
               <button (click)="removeFromCart(line.product.id)">−</button>
               <span>{{ line.quantity }}</span>
               <button [disabled]="line.quantity >= line.product.stockQuantity" (click)="addToCart(line.product)">+</button>
             </div>
           </td>
-          <td>${{ line.subtotal }}</td>
+          <td class="font-mono price-text">${{ line.subtotal | number }}</td>
           <td>
             <button class="remove-btn" (click)="removeAll(line.product.id)">Remove</button>
           </td>
@@ -92,69 +120,115 @@
     </table>
 
     <div class="cart-footer">
-      <span class="cart-total">Total: ${{ cartTotal }}</span>
-      <button class="place-order-btn" (click)="placeOrder()" [disabled]="isPlacingOrder">
+      <div class="cart-total-box">
+        <span>Total:</span>
+        <span class="total-amount">${{ cartTotal | number }}</span>
+      </div>
+      <button class="btn btn-place-order" (click)="placeOrder()" [disabled]="isPlacingOrder">
         {{ isPlacingOrder ? 'Placing order...' : 'Place Order' }}
       </button>
     </div>
   </div>
 
-  <p class="success" *ngIf="orderSuccess">✅ Order placed successfully!</p>
-  <p class="error" *ngIf="orderError">{{ orderError }}</p>
+  <div class="alert-box success" *ngIf="orderSuccess">
+    <span class="alert-dot"></span> Order placed successfully! Stock updated.
+  </div>
+  <div class="alert-box error" *ngIf="orderError">
+    <span class="alert-dot"></span> {{ orderError }}
+  </div>
+</main>
 
-  <!-- Product Details Modal -->
-  <div class="modal-backdrop" *ngIf="selectedProduct" (click)="closeProductModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="closeProductModal()">&times;</button>
-      
-      <div class="modal-header">
-        <span
-          class="badge"
-          [class.badge-danger]="selectedProduct.stockQuantity <= 0"
-          [class.badge-success]="selectedProduct.stockQuantity > 0"
-        >
-          {{ selectedProduct.stockQuantity > 0 ? 'In Stock' : 'Out of Stock' }}
-        </span>
+<!-- Product Details Modal Popup -->
+<div class="modal-backdrop" *ngIf="selectedProduct" (click)="closeProductModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="barcode"></div>
+    <button class="modal-close" (click)="closeProductModal()">&times;</button>
+    
+    <div class="modal-header-product">
+      <div class="card-top">
         <h2>{{ selectedProduct.name }}</h2>
-        <p class="modal-price">${{ selectedProduct.price }}</p>
+        <div class="led" [ngClass]="stockLevel(selectedProduct.stockQuantity)"></div>
+      </div>
+      <p class="modal-price">${{ selectedProduct.price | number }}</p>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-row">
+        <span class="detail-label">PRODUCT ID</span>
+        <span class="detail-val font-mono">#{{ selectedProduct.id }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">CURRENT STOCK</span>
+        <span class="detail-val font-mono" [ngClass]="stockLevel(selectedProduct.stockQuantity)">
+          {{ stockLabel(selectedProduct.stockQuantity) }}
+        </span>
+      </div>
+      <hr class="divider">
+      <div class="detail-row description-row">
+        <span class="detail-label">DESCRIPTION</span>
+        <p class="detail-description">
+          {{ selectedProduct.description || 'No additional specification provided for this product item.' }}
+        </p>
       </div>
 
-      <div class="modal-body">
-        <div class="detail-row">
-          <span class="detail-label">Product ID:</span>
-          <span class="detail-value">#{{ selectedProduct.id }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Available Stock:</span>
-          <span class="detail-value">{{ selectedProduct.stockQuantity }} units</span>
-        </div>
-        <div class="detail-row description-row">
-          <span class="detail-label">Description:</span>
-          <p class="detail-description">
-            {{ selectedProduct.description || 'No description available for this product.' }}
-          </p>
-        </div>
+      <p *ngIf="isModalLoading" class="modal-loading font-mono">Fetching item metadata...</p>
+    </div>
 
-        <p *ngIf="isModalLoading" class="modal-loading">Loading full details...</p>
+    <div class="modal-footer">
+      <button
+        class="add-btn"
+        *ngIf="getCartCount(selectedProduct.id) === 0"
+        [disabled]="selectedProduct.stockQuantity <= 0"
+        (click)="addToCart(selectedProduct)"
+      >
+        {{ selectedProduct.stockQuantity <= 0 ? 'Out of stock' : 'Add to cart' }}
+      </button>
+
+      <div class="qty-pill-controls" *ngIf="getCartCount(selectedProduct.id) > 0">
+        <button (click)="removeFromCart(selectedProduct.id)">−</button>
+        <span>{{ getCartCount(selectedProduct.id) }}</span>
+        <button [disabled]="getCartCount(selectedProduct.id) >= selectedProduct.stockQuantity" (click)="addToCart(selectedProduct)">+</button>
       </div>
 
-      <div class="modal-footer">
-        <div class="cart-controls" *ngIf="getCartCount(selectedProduct.id) === 0">
-          <button
-            class="add-btn"
-            [disabled]="selectedProduct.stockQuantity <= 0"
-            (click)="addToCart(selectedProduct)"
-          >
-            {{ selectedProduct.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
-          </button>
-        </div>
-        <div class="qty-controls" *ngIf="getCartCount(selectedProduct.id) > 0">
-          <button (click)="removeFromCart(selectedProduct.id)">−</button>
-          <span>{{ getCartCount(selectedProduct.id) }}</span>
-          <button [disabled]="getCartCount(selectedProduct.id) >= selectedProduct.stockQuantity" (click)="addToCart(selectedProduct)">+</button>
-        </div>
-        <button class="secondary-btn" (click)="closeProductModal()">Close</button>
+      <button class="btn btn-ghost-dark" (click)="closeProductModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Profile Modal -->
+<div class="modal-backdrop" *ngIf="showProfileModal" (click)="closeProfileModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="barcode"></div>
+
+    <div class="modal-header">
+      <div class="modal-avatar">{{ userInitials }}</div>
+      <div class="modal-header-info">
+        <h3 class="modal-username">{{ userName }}</h3>
+        <span class="role-chip">{{ userRole }}</span>
+      </div>
+      <button class="modal-close" (click)="closeProfileModal()" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-row">
+        <span class="detail-label">USERNAME</span>
+        <span class="detail-val font-mono">{{ userRawUsername }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">DISPLAY NAME</span>
+        <span class="detail-val">{{ userName }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">ROLE</span>
+        <span class="detail-val">{{ userRole }}</span>
       </div>
     </div>
+
+    <div class="modal-footer">
+      <button class="add-btn" style="margin-top:0; width:auto; padding: 10px 20px;" (click)="goToOrders(); closeProfileModal()">My Orders</button>
+      <button class="btn btn-ghost-dark" (click)="closeProfileModal()">Close</button>
+    </div>
+
   </div>
 </div>

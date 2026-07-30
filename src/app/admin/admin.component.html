@@ -1,215 +1,409 @@
-<div class="page">
-  <header>
-    <h1>Admin Dashboard</h1>
-    <button class="back-btn" (click)="goBack()">← Back to Products</button>
-  </header>
+<!-- ── Toolbar ──────────────────────────────────────────────── -->
+<div class="toolbar">
+  <div class="brand">
+    <h1>Admin</h1>
+    <span class="tag">Dashboard</span>
+  </div>
+  <div class="toolbar-right">
+    <button class="btn btn-ghost" (click)="goBack()">← Back to Catalog</button>
+  </div>
+</div>
 
-  <div class="tabs">
-    <button [class.active]="activeTab === 'products'" (click)="setTab('products')">Products</button>
-    <button [class.active]="activeTab === 'users'"    (click)="setTab('users')">Users</button>
-    <button [class.active]="activeTab === 'orders'"   (click)="setTab('orders')">Orders</button>
+<!-- ── Main content ─────────────────────────────────────────── -->
+<main>
+
+  <!-- Page header -->
+  <div class="page-head">
+    <div>
+      <h2>Control Panel</h2>
+      <p>Manage products, users, and orders from one place.</p>
+    </div>
   </div>
 
+  <!-- Tab navigation -->
+  <div class="tab-nav">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'products'"
+      (click)="setTab('products')"
+    >
+      <span class="tab-icon">📦</span> Products
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'users'"
+      (click)="setTab('users')"
+    >
+      <span class="tab-icon">👥</span> Users
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'orders'"
+      (click)="setTab('orders')"
+    >
+      <span class="tab-icon">🛒</span> Orders
+    </button>
+  </div>
+
+  <!-- ────────────── PRODUCTS TAB ────────────── -->
   <div *ngIf="activeTab === 'products'">
 
-    <div class="tab-header">
-      <h2>Manage Products</h2>
-      <button class="add-btn" (click)="openAddProduct()">+ Add Product</button>
+    <div class="section-head">
+      <div>
+        <h3 class="section-title">Manage Products</h3>
+        <p class="section-sub">Add, edit or remove catalog items.</p>
+      </div>
+      <button class="btn btn-amber" (click)="openAddProduct()">+ Add Product</button>
     </div>
 
-    <p class="success" *ngIf="productSuccess">{{ productSuccess }}</p>
-    <p class="error"   *ngIf="productError">{{ productError }}</p>
-    <p *ngIf="productLoading">Loading...</p>
+    <!-- Feedback messages -->
+    <div class="alert-box success" *ngIf="productSuccess">
+      <span class="alert-dot"></span>{{ productSuccess }}
+    </div>
+    <div class="alert-box error" *ngIf="productError">
+      <span class="alert-dot"></span>{{ productError }}
+    </div>
+    <div class="empty" *ngIf="productLoading">Loading products…</div>
 
+    <!-- Product form -->
     <div class="form-card" *ngIf="showProductForm">
-      <h3>{{ editingProduct ? 'Edit Product' : 'Add Product' }}</h3>
-
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" [(ngModel)]="productForm.name" />
-      </div>
-      <div class="form-group">
-        <label>Price</label>
-        <input type="number" [(ngModel)]="productForm.price" />
-      </div>
-      <div class="form-group">
-        <label>Stock Quantity</label>
-        <input type="number" [(ngModel)]="productForm.stockQuantity" />
-      </div>
-      <div class="form-group">
-        <label>Description (optional)</label>
-        <input type="text" [(ngModel)]="productForm.description" />
-      </div>
-
-      <div class="form-actions">
-        <button class="save-btn" (click)="saveProduct()">Save</button>
-        <button class="cancel-btn" (click)="cancelProductForm()">Cancel</button>
+      <div class="barcode"></div>
+      <div class="form-card-body">
+        <h4 class="form-title">{{ editingProduct ? 'Edit Product' : 'New Product' }}</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" [(ngModel)]="productForm.name" placeholder="Product name" />
+          </div>
+          <div class="form-group">
+            <label>Price ($)</label>
+            <input type="number" [(ngModel)]="productForm.price" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label>Stock Quantity</label>
+            <input type="number" [(ngModel)]="productForm.stockQuantity" placeholder="0" />
+          </div>
+          <div class="form-group full-width">
+            <label>Description <span class="optional">(optional)</span></label>
+            <input type="text" [(ngModel)]="productForm.description" placeholder="Short description…" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-amber" (click)="saveProduct()">Save Product</button>
+          <button class="btn btn-ghost-dark" (click)="cancelProductForm()">Cancel</button>
+        </div>
       </div>
     </div>
 
-    <table class="data-table" *ngIf="!productLoading && products.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of products">
-          <td>{{ p.id }}</td>
-          <td>{{ p.name }}</td>
-          <td>${{ p.price }}</td>
-          <td>{{ p.stockQuantity }}</td>
-          <td class="actions">
-            <button class="edit-btn"   (click)="openEditProduct(p)">Edit</button>
-            <button class="delete-btn" (click)="deleteProduct(p.id)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="!productLoading && products.length === 0">No products found.</p>
+    <!-- Products table -->
+    <div class="table-card" *ngIf="!productLoading && products.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td class="font-mono text-muted">#{{ p.id }}</td>
+            <td class="font-bold">{{ p.name }}</td>
+            <td class="font-mono price-val">${{ p.price }}</td>
+            <td>
+              <span
+                class="stock-badge"
+                [class.stock-ok]="p.stockQuantity >= 10"
+                [class.stock-low]="p.stockQuantity > 0 && p.stockQuantity < 10"
+                [class.stock-out]="p.stockQuantity === 0"
+              >
+                {{ p.stockQuantity === 0 ? 'Out of stock' : p.stockQuantity + ' in stock' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="action-btn action-edit" (click)="openEditProduct(p)">Edit</button>
+              <button class="action-btn action-delete" (click)="deleteProduct(p.id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty" *ngIf="!productLoading && products.length === 0">No products found.</div>
+
   </div>
 
+  <!-- ────────────── USERS TAB ────────────── -->
   <div *ngIf="activeTab === 'users'">
 
-    <div class="tab-header">
-      <h2>Manage Users</h2>
+    <div class="section-head">
+      <div>
+        <h3 class="section-title">Manage Users</h3>
+        <p class="section-sub">View, edit and manage user accounts.</p>
+      </div>
       <div class="btn-group">
-        <button class="add-btn"      (click)="openCreateUser('customer')">+ Create Customer</button>
-        <button class="add-btn-dark" *ngIf="isSuperAdmin" (click)="openCreateUser('admin')">+ Create Admin</button>
+        <button class="btn btn-amber" (click)="openCreateUser('customer')">+ Create Customer</button>
+        <button class="btn btn-dark" *ngIf="isSuperAdmin" (click)="openCreateUser('admin')">+ Create Admin</button>
       </div>
     </div>
 
-    <p class="success" *ngIf="userSuccess">{{ userSuccess }}</p>
-    <p class="error"   *ngIf="userError">{{ userError }}</p>
-    <p *ngIf="userLoading">Loading...</p>
+    <!-- Feedback messages -->
+    <div class="alert-box success" *ngIf="userSuccess">
+      <span class="alert-dot"></span>{{ userSuccess }}
+    </div>
+    <div class="alert-box error" *ngIf="userError">
+      <span class="alert-dot"></span>{{ userError }}
+    </div>
+    <div class="empty" *ngIf="userLoading">Loading users…</div>
 
+    <!-- User form -->
     <div class="form-card" *ngIf="showUserForm">
-      <h3>{{ editingUser ? 'Edit User' : ('Create ' + (newUserRole === 'admin' ? 'Admin' : 'Customer')) }}</h3>
-
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" [(ngModel)]="userForm.username" />
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" [(ngModel)]="userForm.email" />
-      </div>
-      <div class="form-group" *ngIf="!editingUser">
-        <label>Password</label>
-        <input type="password" [(ngModel)]="userForm.password" />
-      </div>
-      <div class="form-group">
-        <label>First Name</label>
-        <input type="text" [(ngModel)]="userForm.firstName" />
-      </div>
-      <div class="form-group">
-        <label>Last Name</label>
-        <input type="text" [(ngModel)]="userForm.lastName" />
-      </div>
-
-      <div class="form-actions">
-        <button class="save-btn"   (click)="saveUser()">Save</button>
-        <button class="cancel-btn" (click)="cancelUserForm()">Cancel</button>
+      <div class="barcode"></div>
+      <div class="form-card-body">
+        <h4 class="form-title">
+          {{ editingUser ? 'Edit User' : ('Create ' + (newUserRole === 'admin' ? 'Admin' : 'Customer')) }}
+        </h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" [(ngModel)]="userForm.username" placeholder="username" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="userForm.email" placeholder="user@example.com" />
+          </div>
+          <div class="form-group" *ngIf="!editingUser">
+            <label>Password</label>
+            <input type="password" [(ngModel)]="userForm.password" placeholder="••••••••" />
+          </div>
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" [(ngModel)]="userForm.firstName" placeholder="First name" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" [(ngModel)]="userForm.lastName" placeholder="Last name" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-amber" (click)="saveUser()">Save User</button>
+          <button class="btn btn-ghost-dark" (click)="cancelUserForm()">Cancel</button>
+        </div>
       </div>
     </div>
 
-    <table class="data-table" *ngIf="!userLoading && users.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let u of users">
-          <td>{{ u.id }}</td>
-          <td>{{ u.username }}</td>
-          <td>{{ u.email }}</td>
-          <td>{{ u.role }}</td>
-          <td>{{ u.active !== false ? 'Yes' : 'No' }}</td>
-          <td class="actions">
-            <button class="edit-btn"       (click)="openEditUser(u)">Edit</button>
-            <button class="deactivate-btn" (click)="deactivateUser(u.id)"
-                    [disabled]="u.active === false">Deactivate</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="!userLoading && users.length === 0">No users found.</p>
+    <!-- Users table -->
+    <div class="table-card" *ngIf="!userLoading && users.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of users">
+            <td class="font-mono text-muted">#{{ u.id }}</td>
+            <td class="font-bold font-mono">
+              <button class="username-link" (click)="openUserDetail(u)">{{ u.username }}</button>
+            </td>
+            <td class="text-muted">{{ u.email }}</td>
+            <td>
+              <span class="role-badge" [class.role-admin]="u.role === 'ADMIN' || u.role === 'SUPER_ADMIN'">
+                {{ u.role }}
+              </span>
+            </td>
+            <td>
+              <span class="active-badge" [class.active-yes]="u.active !== false" [class.active-no]="u.active === false">
+                {{ u.active !== false ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="action-btn action-edit" (click)="openEditUser(u)">Edit</button>
+              <button class="action-btn action-delete" (click)="deactivateUser(u.id)" [disabled]="u.active === false">
+                Deactivate
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty" *ngIf="!userLoading && users.length === 0">No users found.</div>
+
   </div>
 
-
+  <!-- ────────────── ORDERS TAB ────────────── -->
   <div *ngIf="activeTab === 'orders'">
 
-    <div class="tab-header">
-      <h2>Manage Orders</h2>
+    <div class="section-head">
+      <div>
+        <h3 class="section-title">Manage Orders</h3>
+        <p class="section-sub">Filter, view and update order statuses.</p>
+      </div>
     </div>
 
-    <p class="success" *ngIf="orderSuccess">{{ orderSuccess }}</p>
-    <p class="error"   *ngIf="orderError">{{ orderError }}</p>
+    <!-- Feedback messages -->
+    <div class="alert-box success" *ngIf="orderSuccess">
+      <span class="alert-dot"></span>{{ orderSuccess }}
+    </div>
+    <div class="alert-box error" *ngIf="orderError">
+      <span class="alert-dot"></span>{{ orderError }}
+    </div>
 
-    <div class="filters">
-      <div class="filter-group">
-        <label>Status</label>
-        <select [(ngModel)]="orderFilterStatus">
-          <option *ngFor="let s of statusOptions" [value]="s">{{ s || 'All' }}</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Username</label>
-        <input type="text" placeholder="e.g. john" [(ngModel)]="orderFilterUsername" />
-      </div>
-      <div class="filter-group">
-        <label>User ID</label>
-        <input type="number" placeholder="e.g. 1" [(ngModel)]="orderFilterUserId" />
-      </div>
-      <div class="filter-group">
-        <label>From</label>
-        <input type="date" [(ngModel)]="orderFilterFrom" />
-      </div>
-      <div class="filter-group">
-        <label>To</label>
-        <input type="date" [(ngModel)]="orderFilterTo" />
+    <!-- Filters -->
+    <div class="filter-card">
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>STATUS</label>
+          <select [(ngModel)]="orderFilterStatus">
+            <option *ngFor="let s of statusOptions" [value]="s">{{ s || 'All Statuses' }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>CUSTOMER USERNAME</label>
+          <input type="text" placeholder="Search username…" [(ngModel)]="orderFilterUsername" />
+        </div>
+        <div class="filter-group">
+          <label>USER ID</label>
+          <input type="number" placeholder="ID #" [(ngModel)]="orderFilterUserId" />
+        </div>
+        <div class="filter-group">
+          <label>FROM DATE</label>
+          <input type="date" [(ngModel)]="orderFilterFrom" />
+        </div>
+        <div class="filter-group">
+          <label>TO DATE</label>
+          <input type="date" [(ngModel)]="orderFilterTo" />
+        </div>
       </div>
       <div class="filter-actions">
-        <button class="search-btn" (click)="applyOrderFilters()">Apply</button>
-        <button class="cancel-btn" (click)="clearOrderFilters()">Clear</button>
+        <button class="btn btn-dark" (click)="applyOrderFilters()">Apply Filters</button>
+        <button class="btn btn-ghost-dark" (click)="clearOrderFilters()">Clear</button>
       </div>
     </div>
 
-    <p *ngIf="orderLoading">Loading...</p>
+    <div class="empty" *ngIf="orderLoading">Loading orders…</div>
 
-    <table class="data-table" *ngIf="!orderLoading && orders.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let o of orders">
-          <td>#{{ o.id }}</td>
-          <td>{{ o.username || o.user?.username || '—' }}</td>
-          <td>{{ o.createdAt | date: 'mediumDate' }}</td>
-          <td>
-            <ul class="item-list">
-              <li *ngFor="let item of o.items">
-                {{ item.productName || item.product?.name }} × {{ item.quantity }}
-              </li>
-            </ul>
-          </td>
-          <td>${{ o.totalAmount ?? o.total ?? '—' }}</td>
-          <td>
-            <span class="badge" [class]="'badge-' + o.status?.toLowerCase()">{{ o.status }}</span>
-          </td>
-          <td class="actions">
-            <!-- Inline status selector + Save button -->
-            <select [(ngModel)]="editingOrderStatus[o.id]">
-              <option *ngFor="let s of statusOptions.slice(1)" [value]="s">{{ s }}</option>
-            </select>
-            <button class="save-btn small" (click)="updateOrderStatus(o.id)">Save</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="!orderLoading && orders.length === 0">No orders found.</p>
+    <!-- Orders table -->
+    <div class="table-card" *ngIf="!orderLoading && orders.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ORDER ID</th>
+            <th>CUSTOMER</th>
+            <th>DATE</th>
+            <th>ITEMS</th>
+            <th>TOTAL</th>
+            <th>STATUS</th>
+            <th>UPDATE STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders">
+            <td class="font-mono font-bold">#{{ o.id }}</td>
+            <td class="font-mono">{{ o.username || o.user?.username || '—' }}</td>
+            <td class="font-mono text-muted">{{ o.createdAt | date: 'mediumDate' }}</td>
+            <td>
+              <div class="item-tags">
+                <span class="item-tag" *ngFor="let item of o.items">
+                  {{ item.productName || item.product?.name }} <strong class="font-mono">×{{ item.quantity }}</strong>
+                </span>
+              </div>
+            </td>
+            <td class="font-mono price-val">${{ o.totalAmount ?? o.total ?? '—' }}</td>
+            <td>
+              <span
+                class="status-badge"
+                [class.status-pending]="o.status === 'PENDING'"
+                [class.status-shipped]="o.status === 'SHIPPED'"
+                [class.status-delivered]="o.status === 'DELIVERED'"
+                [class.status-cancelled]="o.status === 'CANCELLED'"
+              >
+                <span class="dot"></span>{{ o.status }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <select [(ngModel)]="editingOrderStatus[o.id]" class="status-select">
+                <option *ngFor="let s of statusOptions.slice(1)" [value]="s">{{ s }}</option>
+              </select>
+              <button class="action-btn action-save" (click)="updateOrderStatus(o.id)">Save</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty" *ngIf="!orderLoading && orders.length === 0">No orders found.</div>
+
+  </div>
+
+</main>
+
+<!-- ── User Detail Modal ─────────────────────────────────────── -->
+<div class="modal-backdrop" *ngIf="selectedUser" (click)="closeUserDetail()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Barcode header strip -->
+    <div class="barcode"></div>
+
+    <!-- Modal header -->
+    <div class="modal-header">
+      <div class="modal-avatar">{{ getUserInitials(selectedUser) }}</div>
+      <div class="modal-header-info">
+        <h3 class="modal-username">{{ selectedUser.username }}</h3>
+        <div class="modal-badges">
+          <span class="role-badge" [class.role-admin]="selectedUser.role === 'ADMIN' || selectedUser.role === 'SUPER_ADMIN'">
+            {{ selectedUser.role }}
+          </span>
+          <span class="active-badge" [class.active-yes]="selectedUser.active !== false" [class.active-no]="selectedUser.active === false">
+            {{ selectedUser.active !== false ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+      <button class="modal-close" (click)="closeUserDetail()" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Modal body -->
+    <div class="modal-body">
+      <div class="detail-row">
+        <span class="detail-label">USER ID</span>
+        <span class="detail-val font-mono">#{{ selectedUser.id }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">FULL NAME</span>
+        <span class="detail-val">{{ (selectedUser.firstName || '') + ' ' + (selectedUser.lastName || '') | titlecase }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">EMAIL</span>
+        <span class="detail-val font-mono">{{ selectedUser.email || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">FIRST NAME</span>
+        <span class="detail-val">{{ selectedUser.firstName || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">LAST NAME</span>
+        <span class="detail-val">{{ selectedUser.lastName || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">ROLE</span>
+        <span class="detail-val">{{ selectedUser.role }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">ACCOUNT STATUS</span>
+        <span class="detail-val">{{ selectedUser.active !== false ? 'Active' : 'Deactivated' }}</span>
+      </div>
+    </div>
+
+    <!-- Modal footer -->
+    <div class="modal-footer">
+      <button class="btn btn-amber" (click)="openEditUser(selectedUser); closeUserDetail()">Edit User</button>
+      <button class="btn btn-ghost-dark" (click)="closeUserDetail()">Close</button>
+    </div>
+
   </div>
 </div>

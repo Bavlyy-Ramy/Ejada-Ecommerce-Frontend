@@ -1,36 +1,52 @@
 <div class="login-page">
+  <div class="brand-header">
+    <h1>Products</h1>
+    <span class="tag">Inventory Access</span>
+  </div>
+
   <form class="login-card" (ngSubmit)="onSubmit()">
-    <h1>Sign in</h1>
-    <p class="subtitle">Log in to browse the shop</p>
+    <div class="barcode"></div>
+    <div class="card-content">
+      <h2>Sign in</h2>
+      <p class="subtitle">Enter your credentials to access the catalog.</p>
 
-    <label for="username">Username</label>
-    <input
-      id="username"
-      type="text"
-      name="username"
-      [(ngModel)]="username"
-      required
-      autocomplete="username"
-    />
+      <div class="form-group">
+        <label for="username">USERNAME</label>
+        <input
+          id="username"
+          type="text"
+          name="username"
+          [(ngModel)]="username"
+          placeholder="e.g. customer1"
+          required
+          autocomplete="username"
+        />
+      </div>
 
-    <label for="password">Password</label>
-    <input
-      id="password"
-      type="password"
-      name="password"
-      [(ngModel)]="password"
-      required
-      autocomplete="current-password"
-    />
+      <div class="form-group">
+        <label for="password">PASSWORD</label>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+        />
+      </div>
 
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="alert-box error" *ngIf="errorMessage">
+        <span class="alert-dot"></span> {{ errorMessage }}
+      </div>
 
-    <button type="submit" [disabled]="isLoading">
-      {{ isLoading ? 'Signing in...' : 'Sign in' }}
-    </button>
+      <button type="submit" class="btn-submit" [disabled]="isLoading">
+        {{ isLoading ? 'Authenticating...' : 'Sign in' }}
+      </button>
 
-    <p class="switch-link">
-      No account yet? <a routerLink="/register">Create one</a>
-    </p>
+      <p class="switch-link">
+        Don't have an account? <a routerLink="/register">Create account</a>
+      </p>
+    </div>
   </form>
 </div>

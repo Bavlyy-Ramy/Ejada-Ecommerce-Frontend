@@ -29,6 +29,9 @@ export class ProductListComponent implements OnInit {
 
   selectedProduct: Product | null = null;
   isModalLoading = false;
+  showProfileModal = false;
+  userRole = '';
+  userRawUsername = '';
 
   constructor(
     private productService: ProductService,
@@ -41,7 +44,37 @@ export class ProductListComponent implements OnInit {
     const role = this.authService.getRoleFromToken();
     this.isAdmin = role === 'ADMIN' || role === 'SUPERADMIN' || (!!role && role.includes('ADMIN'));
     this.userName = this.authService.getUserName() || 'Customer';
+    this.userRole = role || 'USER';
+    this.userRawUsername = localStorage.getItem('username') || this.userName;
     this.loadProducts();
+  }
+
+  get userInitials(): string {
+    if (!this.userName) return 'CU';
+    const parts = this.userName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return this.userName.substring(0, 2).toUpperCase();
+  }
+
+  stockLevel(stock: number): 'ok' | 'low' | 'out' {
+    if (stock === 0) return 'out';
+    if (stock < 10) return 'low';
+    return 'ok';
+  }
+
+  stockLabel(stock: number): string {
+    if (stock === 0) return 'Out of stock';
+    if (stock < 10) return `Low · ${stock} left`;
+    return `${stock} in stock`;
+  }
+
+  scrollToCart(): void {
+    const cartEl = document.getElementById('cartSection');
+    if (cartEl) {
+      cartEl.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   loadProducts(): void {
@@ -97,6 +130,14 @@ export class ProductListComponent implements OnInit {
 
   closeProductModal(): void {
     this.selectedProduct = null;
+  }
+
+  openProfileModal(): void {
+    this.showProfileModal = true;
+  }
+
+  closeProfileModal(): void {
+    this.showProfileModal = false;
   }
 
   getCartCount(productId: number): number {

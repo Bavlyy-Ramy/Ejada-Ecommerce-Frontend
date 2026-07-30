@@ -28,6 +28,8 @@ export class OrderListComponent implements OnInit {
 
   statusOptions = ['', 'PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
+  userName = '';
+
   constructor(
     private orderService: OrderService,
     private authService: AuthService,
@@ -37,7 +39,17 @@ export class OrderListComponent implements OnInit {
   ngOnInit(): void {
     const role = this.authService.getRoleFromToken();
     this.isAdmin = role === 'ADMIN' || role === 'SUPERADMIN' || (!!role && role.includes('ADMIN'));
+    this.userName = this.authService.getUserName() || 'Customer';
     this.loadOrders();
+  }
+
+  get userInitials(): string {
+    if (!this.userName) return 'CU';
+    const parts = this.userName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return this.userName.substring(0, 2).toUpperCase();
   }
 
   loadOrders(): void {
